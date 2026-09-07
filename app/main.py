@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
@@ -62,6 +62,13 @@ app.include_router(grievances.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():
+    # Serve frontend index.html if available, otherwise return API status
+    frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend/dist")
+    index_file = os.path.join(frontend_dist, "index.html")
+    
+    if os.path.exists(index_file):
+        return FileResponse(index_file)
+    
     return {
         "service": settings.PROJECT_NAME,
         "status": "online",
@@ -75,7 +82,6 @@ def root():
 async def serve_frontend(path: str):
     # Don't serve frontend for API routes
     if path.startswith("api/") or path.startswith("uploads/"):
-        from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Not found")
     
     frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend/dist")
@@ -91,7 +97,6 @@ async def serve_frontend(path: str):
             return FileResponse(index_file)
     
     # Fallback to API response if frontend not built
-    from fastapi.responses import JSONResponse
     return JSONResponse({
         "service": settings.PROJECT_NAME,
         "status": "online",
