@@ -2,6 +2,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, JSONResponse
 from app.core.config import settings
 from app.core.database import engine, Base
 import app.models  # Ensures all models are imported
@@ -32,6 +33,11 @@ app.add_middleware(
 # Mount uploads static folder
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
+# Mount frontend static files for production
+frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend/dist")
+if os.path.exists(frontend_dist):
+    app.mount("/static", StaticFiles(directory=frontend_dist), name="static")
+
 # Include Routers
 from app.api import auth, locations, parcels, surveys, discrepancies, documents, reports, analytics, ai, system, grievances
 
@@ -56,6 +62,35 @@ def root():
         "land_data_provider": settings.LAND_DATA_PROVIDER,
         "mode": "Demonstration / Synthetic Evaluation Records"
     }
+
+# Serve frontend for all non-API routes in production
+@app.get("/{path:path}")
+async def serve_frontend(path: str):
+    # Don't serve frontend for API routes
+    if path.startswith("api/") or path.startswith("uploads/"):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Not found")
+    
+    frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend/dist")
+    index_file = os.path.join(frontend_dist, "index.html")
+    
+    if os.path.exists(frontend_dist):
+        # If the requested file exists, serve it
+        file_path = os.path.join(frontend_dist, path)
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        # Otherwise, serve index.html for SPA routing
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+    
+    # Fallback to API response if frontend not built
+    from fastapi.responses import JSONResponse
+    return JSONResponse({
+        "service": settings.PROJECT_NAME,
+        "status": "online",
+        "docs": "/api/docs",
+        "message": "Frontend not built. Please build the frontend for full functionality."
+    })
 
 if __name__ == "__main__":
     import uvicorn
