@@ -1,27 +1,4 @@
-# Local Python environment and caches
-.venv/
-__pycache__/
-*.py[cod]
-.pytest_cache/
-
-# Local runtime data and secrets
-*.db
-*.sqlite
-*.sqlite3
-.env
-.env.*
-backend/uploads/*
-
-# Official data exports can contain sensitive or large records
-backend/seed/*.xlsx
-backend/seed/*.xls
-
-# Frontend dependencies and build output
-frontend/node_modules/
-frontend/dist/
-
-# Editor and OS files
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
+```
+# Dependencies
+node_modules/
+```
