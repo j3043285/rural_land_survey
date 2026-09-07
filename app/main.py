@@ -7,9 +7,6 @@ from app.core.config import settings
 from app.core.database import engine, Base
 import app.models  # Ensures all models are imported
 
-# Create database tables if not already created
-Base.metadata.create_all(bind=engine)
-
 # Ensure upload directory exists
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 
@@ -37,6 +34,16 @@ app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads"
 frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend/dist")
 if os.path.exists(frontend_dist):
     app.mount("/static", StaticFiles(directory=frontend_dist), name="static")
+
+# Startup event to create database tables
+@app.on_event("startup")
+async def startup_event():
+    # Create database tables if not already created
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"Warning: Could not create database tables on startup: {e}")
+        print("The application will continue, but some features may not work properly.")
 
 # Include Routers
 from app.api import auth, locations, parcels, surveys, discrepancies, documents, reports, analytics, ai, system, grievances
