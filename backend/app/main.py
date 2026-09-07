@@ -33,7 +33,7 @@ app.add_middleware(
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
 # Include Routers
-from app.api import auth, locations, parcels, surveys, discrepancies, documents, reports, analytics, ai, system, grievances
+from app.api import auth, locations, parcels, surveys, discrepancies, documents, reports, analytics, ai, system, grievances, blockchain, dispute_prediction
 
 app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(locations.router, prefix=settings.API_V1_STR)
@@ -46,6 +46,8 @@ app.include_router(analytics.router, prefix=settings.API_V1_STR)
 app.include_router(ai.router, prefix=settings.API_V1_STR)
 app.include_router(system.router, prefix=settings.API_V1_STR)
 app.include_router(grievances.router, prefix=settings.API_V1_STR)
+app.include_router(blockchain.router, prefix=f"{settings.API_V1_STR}/blockchain")
+app.include_router(dispute_prediction.router, prefix=f"{settings.API_V1_STR}/dispute-prediction")
 
 @app.get("/")
 def root():

@@ -7,6 +7,7 @@ from app.models.discrepancies import Discrepancy, DiscrepancyType, DiscrepancySe
 from app.models.documents import Document
 from app.models.system import AuditLog, Notification
 from app.models.grievances import Grievance, GrievanceStatus, GrievanceType
+from app.models.blockchain_verification import BlockchainVerification
 
 __all__ = [
     "Base",
@@ -36,4 +37,5 @@ __all__ = [
     "Grievance",
     "GrievanceStatus",
     "GrievanceType",
+    "BlockchainVerification",
 ]

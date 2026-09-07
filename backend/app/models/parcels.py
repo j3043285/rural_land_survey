@@ -72,6 +72,7 @@ class LandParcel(Base):
     crops = relationship("CropRecord", back_populates="parcel", cascade="all, delete-orphan")
     mutations = relationship("MutationRecord", back_populates="parcel", cascade="all, delete-orphan")
     grievances = relationship("Grievance", back_populates="parcel", cascade="all, delete-orphan")
+    blockchain_records = relationship("BlockchainVerification", back_populates="parcel", cascade="all, delete-orphan")
 
 class ParcelOwner(Base):
     __tablename__ = "parcel_owners"
