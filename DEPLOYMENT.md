@@ -63,7 +63,7 @@ gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:$PORT
 ```
 
 **Environment Variables:**
-- `PYTHON_VERSION`: `3.11`
+- `PYTHON_VERSION`: `3.12`
 - `DATABASE_URL`: (Will be provided by PostgreSQL database)
 - `SECRET_KEY`: (Generate a secure random string)
 - `LAND_DATA_PROVIDER`: `mock`
@@ -89,17 +89,22 @@ The following issues were addressed to enable Render deployment:
 - **Solution**: Updated database configuration to support PostgreSQL with connection pooling
 - **File**: `app/core/database.py`
 
-### 2. Render Configuration
+### 2. Python Version Compatibility
+- **Problem**: Python 3.14 has compatibility issues with `psycopg2-binary`
+- **Solution**: Changed to Python 3.12 and upgraded to `psycopg[binary]` for better compatibility
+- **Files**: `render.yaml`, `requirements.txt`
+
+### 3. Render Configuration
 - **Problem**: No `render.yaml` file existed
 - **Solution**: Created comprehensive Render configuration with auto-scaling and database linking
 - **File**: `render.yaml`
 
-### 3. Frontend Integration
+### 4. Frontend Integration
 - **Problem**: Frontend not integrated with backend for production
 - **Solution**: Added static file serving and SPA routing support
 - **File**: `app/main.py`
 
-### 4. Environment Variables
+### 5. Environment Variables
 - **Problem**: No documentation for required environment variables
 - **Solution**: Created environment variable documentation
 - **File**: `ENVIRONMENT_VARIABLES.md`
@@ -115,6 +120,13 @@ The following issues were addressed to enable Render deployment:
 - Ensure PostgreSQL database is running
 - Check that `DATABASE_URL` is correctly set
 - Verify database connection pooling settings
+- If you see `psycopg2` import errors, the project now uses `psycopg[binary]` for better compatibility
+
+### Import Errors with psycopg2
+If you encounter errors like `ImportError: /opt/render/project/src/.venv/lib/python3.14/site-packages/psycopg2/_psycopg.cpython-314-x86_64-linux-gnu.so: undefined symbol: _PyInterpreterState_Get`:
+- This is due to Python 3.14 compatibility issues with older psycopg2-binary
+- Fixed by upgrading to Python 3.12 and using `psycopg[binary]` instead
+- Ensure your render.yaml specifies `PYTHON_VERSION: 3.12`
 
 ### Frontend Not Loading
 - Ensure frontend build completed successfully
@@ -123,7 +135,7 @@ The following issues were addressed to enable Render deployment:
 
 ### Application Won't Start
 - Check that Gunicorn can find the app module
-- Verify Python version compatibility
+- Verify Python version compatibility (use 3.12, not 3.14)
 - Ensure all environment variables are set
 
 ## Accessing Your Deployed App

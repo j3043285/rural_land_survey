@@ -11,6 +11,7 @@ These environment variables need to be configured for the application to work pr
 ### Application Configuration
 - `LAND_DATA_PROVIDER`: Set to "mock" for demonstration mode or "official" for production
 - `PORT`: Application port (default: 8000)
+- `PYTHON_VERSION`: Python version (set to 3.12 for compatibility)
 
 ## Optional Variables
 
@@ -21,6 +22,7 @@ These environment variables need to be configured for the application to work pr
 ## Render Configuration
 
 In the render.yaml file, these variables are automatically configured:
+- `PYTHON_VERSION` is set to 3.12 (for psycopg[binary] compatibility)
 - `DATABASE_URL` is linked to the PostgreSQL database
 - `SECRET_KEY` is auto-generated
 - `LAND_DATA_PROVIDER` defaults to "mock"
@@ -34,4 +36,9 @@ SECRET_KEY=your-local-secret-key
 DATABASE_URL=sqlite:///./rural_land.db
 LAND_DATA_PROVIDER=mock
 PORT=8000
+PYTHON_VERSION=3.12
 ```
+
+## Database Library Notes
+
+The project uses `psycopg[binary]` instead of `psycopg2-binary` for better Python 3.12+ compatibility. This library is the modern, actively maintained replacement for psycopg2-binary and provides better support for newer Python versions.

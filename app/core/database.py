@@ -3,12 +3,14 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from app.core.config import settings
 
 # Add pool configuration for PostgreSQL on Render
-if settings.DATABASE_URL.startswith("postgresql"):
+if settings.DATABASE_URL.startswith("postgresql") or settings.DATABASE_URL.startswith("postgres"):
     engine = create_engine(
         settings.DATABASE_URL,
         pool_pre_ping=True,
         pool_size=5,
-        max_overflow=10
+        max_overflow=10,
+        pool_recycle=3600,
+        echo=False
     )
 else:
     # For SQLite, ensure check_same_thread=False

@@ -8,7 +8,7 @@ class Settings:
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1 day
     
-    # Defaults to local SQLite if MySQL is not configured; production can supply MySQL URL
+    # Defaults to local SQLite if PostgreSQL is not configured; production can supply PostgreSQL URL
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL", 
         f"sqlite:///{os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../rural_land.db'))}"
