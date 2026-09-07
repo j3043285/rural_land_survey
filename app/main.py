@@ -66,9 +66,15 @@ def root():
     frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend/dist")
     index_file = os.path.join(frontend_dist, "index.html")
     
+    print(f"Looking for frontend at: {frontend_dist}")
+    print(f"Index file exists: {os.path.exists(index_file)}")
+    print(f"Frontend dist exists: {os.path.exists(frontend_dist)}")
+    
     if os.path.exists(index_file):
+        print("Serving frontend index.html")
         return FileResponse(index_file)
     
+    print("Frontend not found, returning API status")
     return {
         "service": settings.PROJECT_NAME,
         "status": "online",
