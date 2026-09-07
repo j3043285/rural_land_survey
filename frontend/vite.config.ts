@@ -8,18 +8,23 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  base: '/',
   server: {
     port: 5173,
     allowedHosts: ['short-breads-jump.loca.lt'],
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8000',
+        target: process.env.VITE_API_URL || 'http://127.0.0.1:8000',
         changeOrigin: true,
       },
       '/uploads': {
-        target: 'http://127.0.0.1:8000',
+        target: process.env.VITE_API_URL || 'http://127.0.0.1:8000',
         changeOrigin: true,
       }
     }
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: true,
   }
 })

@@ -1,0 +1,25 @@
+version: 2
+
+builds:
+  - src: ./backend
+    use_default_nixpkgs: true
+    builder: |
+      # Build backend
+      cd backend
+      pip install -r requirements.txt
+      
+  - src: ./frontend
+    use_default_nixpkgs: true
+    builder: |
+      # Build frontend
+      cd frontend
+      npm install
+      npm run build
+
+routes:
+  - src: /api/.*
+    dest: backend
+  - src: /uploads/.*
+    dest: backend
+  - src: .*
+    dest: frontend

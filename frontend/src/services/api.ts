@@ -9,7 +9,8 @@ import {
   DocumentRecord
 } from '../types';
 
-const API_BASE = '/api';
+// Use environment variable for API base URL in production
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
   const token = localStorage.getItem('access_token');
@@ -19,7 +20,10 @@ async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
     ...(options?.headers || {})
   };
 
-  const response = await fetch(`${API_BASE}${url}`, {
+  // Ensure full URL in production
+  const fullUrl = url.startsWith('http') ? url : `${API_BASE}${url}`;
+  
+  const response = await fetch(fullUrl, {
     ...options,
     headers
   });
@@ -103,7 +107,8 @@ export const api = {
     fetchJSON<DocumentRecord[]>(`/documents${parcelId ? `?parcel_id=${parcelId}` : ''}`),
   uploadDocument: async (formData: FormData): Promise<DocumentRecord> => {
     const token = localStorage.getItem('access_token');
-    const response = await fetch(`${API_BASE}/documents/upload`, {
+    const fullUrl = `/documents/upload`.startsWith('http') ? `/documents/upload` : `${API_BASE}/documents/upload`;
+    const response = await fetch(fullUrl, {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: formData
@@ -117,7 +122,7 @@ export const api = {
     fetchJSON<DashboardStats>(`/dashboard/statistics${villageId ? `?village_id=${villageId}` : ''}`),
 
   // Reports
-  getParcelPdfUrl: (parcelId: number) => `/api/reports/parcel/${parcelId}/pdf`,
+  getParcelPdfUrl: (parcelId: number) => `${API_BASE.replace('/api', '')}/api/reports/parcel/${parcelId}/pdf`,
 
   // System & AI
   getSystemStatus: () => fetchJSON<any>('/system/status'),
@@ -126,5 +131,17 @@ export const api = {
     fetchJSON<any>('/ai/query', {
       method: 'POST',
       body: JSON.stringify({ query })
-    })
+    }),
+  
+  // Blockchain Verification
+  getBlockchainVerification: (parcelId: number) =>
+    fetchJSON<any>(`/blockchain/verify/${parcelId}`),
+  generateBlockchainCertificate: (parcelId: number) =>
+    fetchJSON<any>(`/blockchain/generate/${parcelId}`, { method: 'POST' }),
+  
+  // Dispute Prediction
+  predictDispute: (parcelId: number) =>
+    fetchJSON<any>(`/dispute-prediction/predict/${parcelId}`),
+  getDisputeRiskAnalysis: (villageId?: number) =>
+    fetchJSON<any>(`/dispute-prediction/analysis${villageId ? `?village_id=${villageId}` : ''}`)
 };

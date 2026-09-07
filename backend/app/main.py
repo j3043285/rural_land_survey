@@ -12,6 +12,9 @@ Base.metadata.create_all(bind=engine)
 # Ensure upload directory exists
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 
+# Get allowed origins from environment variable
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000").split(",")
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="SIH 2026 Problem Statement SIH26010: Rural Agricultural Land Survey / Resurvey Platform",
@@ -20,10 +23,10 @@ app = FastAPI(
     redoc_url="/api/redoc"
 )
 
-# CORS middleware
+# CORS middleware with configurable origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
