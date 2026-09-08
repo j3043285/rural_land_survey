@@ -1,15 +1,21 @@
 import os
+<<<<<<< HEAD
 import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
+=======
+from fastapi import FastAPI, HTTPException
+>>>>>>> 83d6cb81c4b866a70aee41b4930747d295be1f12
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, JSONResponse
 from app.core.config import settings
 from app.core.database import engine, Base, SessionLocal
 import app.models  # Ensures all models are imported
 
+<<<<<<< HEAD
 
 def _auto_seed():
     """Seed Districts/Talukas/Villages from the bundled XLS workbook if the
@@ -58,6 +64,10 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown (nothing to clean up)
 
+=======
+# Ensure upload directory exists
+os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+>>>>>>> 83d6cb81c4b866a70aee41b4930747d295be1f12
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -80,6 +90,21 @@ app.add_middleware(
 # Mount uploads static folder
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
+# Mount frontend static files for production
+frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend/dist")
+if os.path.exists(frontend_dist):
+    app.mount("/static", StaticFiles(directory=frontend_dist), name="static")
+
+# Startup event to create database tables
+@app.on_event("startup")
+async def startup_event():
+    # Create database tables if not already created
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"Warning: Could not create database tables on startup: {e}")
+        print("The application will continue, but some features may not work properly.")
+
 # Include Routers
 from app.api import auth, locations, parcels, surveys, discrepancies, documents, reports, analytics, ai, system, grievances
 
@@ -98,6 +123,19 @@ app.include_router(grievances.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():
+    # Serve frontend index.html if available, otherwise return API status
+    frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend/dist")
+    index_file = os.path.join(frontend_dist, "index.html")
+    
+    print(f"Looking for frontend at: {frontend_dist}")
+    print(f"Index file exists: {os.path.exists(index_file)}")
+    print(f"Frontend dist exists: {os.path.exists(frontend_dist)}")
+    
+    if os.path.exists(index_file):
+        print("Serving frontend index.html")
+        return FileResponse(index_file)
+    
+    print("Frontend not found, returning API status")
     return {
         "service": settings.PROJECT_NAME,
         "status": "online",
@@ -106,6 +144,35 @@ def root():
         "mode": "Demonstration / Synthetic Evaluation Records"
     }
 
+<<<<<<< HEAD
+=======
+# Serve frontend for all non-API routes in production
+@app.get("/{path:path}")
+async def serve_frontend(path: str):
+    # Don't serve frontend for API routes
+    if path.startswith("api/") or path.startswith("uploads/"):
+        raise HTTPException(status_code=404, detail="Not found")
+    
+    frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend/dist")
+    index_file = os.path.join(frontend_dist, "index.html")
+    
+    if os.path.exists(frontend_dist):
+        # If the requested file exists, serve it
+        file_path = os.path.join(frontend_dist, path)
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        # Otherwise, serve index.html for SPA routing
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+    
+    # Fallback to API response if frontend not built
+    return JSONResponse({
+        "service": settings.PROJECT_NAME,
+        "status": "online",
+        "docs": "/api/docs",
+        "message": "Frontend not built. Please build the frontend for full functionality."
+    })
+>>>>>>> 83d6cb81c4b866a70aee41b4930747d295be1f12
 
 if __name__ == "__main__":
     import uvicorn
